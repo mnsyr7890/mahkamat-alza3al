@@ -2,364 +2,297 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>محكمة الزعل</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>محكمة الزعل العليا | النظام المتقدم</title>
   <style>
     :root {
-      --bg1: #1b1027; --bg2: #32152d; --pink: #ff5fa2; --hot: #ff2f7c;
-      --soft: #fff1f7; --card: rgba(255, 255, 255, .12); --line: rgba(255, 255, 255, .22);
-      --gold: #ffd36b; --green: #71f0ba; --red: #ff6b7d;
+      --primary: #ff007f; --secondary: #00f0ff; --bg: #0a0510;
+      --glass: rgba(20, 10, 30, 0.65); --border: rgba(255, 0, 127, 0.3);
+      --glow: 0 0 20px rgba(255, 0, 127, 0.4);
+      --mood-hue: 0; /* يتغير ديناميكياً برمجياً */
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
     body {
-      margin: 0; min-height: 100vh; overflow-x: hidden; font-family: Tahoma, Arial, sans-serif;
-      background:
-        radial-gradient(circle at 18% 20%, rgba(255,95,162,.35), transparent 34%),
-        radial-gradient(circle at 85% 18%, rgba(255,211,107,.22), transparent 28%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      color: white; display: flex; align-items: center; justify-content: center; padding: 18px;
+      background-color: var(--bg); color: #fff; font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; perspective: 1000px;
     }
-    .stage { width: min(760px, 100%); position: relative; z-index: 2; }
-    .card {
-      background: var(--card); border: 1px solid var(--line); border-radius: 28px; padding: 24px;
-      box-shadow: 0 25px 70px rgba(0,0,0,.35); backdrop-filter: blur(14px); text-align: center;
-      animation: pop .45s ease;
+    
+    /* محرك الـ Canvas بالخلفية */
+    #canvas-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    
+    /* الحاوية الرئيسية الزجاجية */
+    .app-container {
+      position: relative; z-index: 10; width: min(90%, 500px);
+      background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: 30px; padding: 40px 30px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.05);
+      text-align: center; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
     }
-    @keyframes pop { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .badge { display: inline-block; padding: 9px 14px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.1); font-size: 14px; color: #ffe2ef; }
-    h1 { font-size: clamp(28px, 7vw, 52px); margin: 18px 0 10px; line-height: 1.2; }
-    p { font-size: clamp(17px, 4vw, 22px); line-height: 1.8; color: #ffe8f2; margin: 10px 0; }
-    .small { font-size: 15px; color: #ffd9e8; }
-    .btns { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 22px; }
-    button {
-      border: 0; border-radius: 18px; padding: 15px 22px; font-size: 18px; font-weight: 800; cursor: pointer;
-      color: #2b1022; background: linear-gradient(135deg, #fff, #ffd7ea); box-shadow: 0 12px 26px rgba(0,0,0,.18);
-      transition: .2s transform, .2s filter, .2s opacity;
+    
+    /* نصوص وتأثيرات الكتابة */
+    h1 { font-size: clamp(24px, 6vw, 36px); margin-bottom: 15px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 10px rgba(255,0,127,0.3)); }
+    p { font-size: 16px; line-height: 1.6; color: rgba(255,255,255,0.8); margin-bottom: 25px; }
+    .typewriter { display: inline-block; overflow: hidden; white-space: nowrap; border-left: 2px solid var(--primary); animation: typing 2s steps(40, end), blink 0.75s step-end infinite; }
+    @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--primary); } }
+    
+    /* الأزرار السيبرانية */
+    .btn {
+      position: relative; padding: 16px 32px; font-size: 18px; font-weight: bold; color: #fff;
+      background: transparent; border: 2px solid var(--primary); border-radius: 15px; cursor: pointer;
+      overflow: hidden; transition: 0.3s; box-shadow: var(--glow); outline: none; display: inline-block;
     }
-    button:active:not(:disabled) { transform: scale(.96); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .primary { background: linear-gradient(135deg, var(--pink), var(--gold)); color: white; text-shadow: 0 1px 4px rgba(0,0,0,.25); }
-    .danger { background: linear-gradient(135deg, #3b3140, #2a202e); color: #ffe3ec; border: 1px solid rgba(255,255,255,.22); }
-    .ghost { background: rgba(255,255,255,.1); color: white; border: 1px solid var(--line); }
-    .fade { animation: pop .35s ease; }
-    .court { font-size: 64px; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); margin-top: 8px; }
-    .casebox { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; text-align: right; }
-    .casebox div { background: rgba(255,255,255,.1); border: 1px solid var(--line); border-radius: 16px; padding: 12px; color: #ffe9f3; }
-    @media(max-width: 520px) { .casebox { grid-template-columns: 1fr; } .card { padding: 20px 15px; } }
-    .choice { min-width: 150px; }
-    .jury { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
-    .juror { background: rgba(255,255,255,.1); border: 1px solid var(--line); border-radius: 18px; padding: 14px; min-height: 110px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
-    .juror b { font-size: 34px; } .juror span { font-size: 15px; color: #ffe0ec; }
-    @media(max-width: 560px) { .jury { grid-template-columns: 1fr; } }
+    .btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s; }
+    .btn:hover::before { left: 100%; }
+    .btn:active:not(:disabled) { transform: scale(0.95); }
+    .btn-solid { background: var(--primary); color: #000; box-shadow: 0 0 25px var(--primary); }
     
-    /* Wheel Styles */
-    .wheelWrap { display: flex; justify-content: center; margin: 22px 0; position: relative; overflow: hidden; padding: 20px 0; }
-    .pointer { position: absolute; top: 10px; z-index: 3; font-size: 34px; filter: drop-shadow(0 4px 6px #000); }
-    .wheel {
-      width: min(330px, 82vw); aspect-ratio: 1; border-radius: 50%; border: 8px solid rgba(255,255,255,.75);
-      background: conic-gradient(#ff5fa2 0 60deg, #ffd36b 60deg 120deg, #9d7cff 120deg 180deg, #71f0ba 180deg 240deg, #ff8aa8 240deg 300deg, #ffe28c 300deg 360deg);
-      position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.35); transition: transform 4.2s cubic-bezier(.12,.85,.18,1);
+    /* نظام البصمة المتقدم (SVG Circle Progress) */
+    .scanner-wrap { position: relative; width: 150px; height: 150px; margin: 0 auto 30px; cursor: pointer; }
+    .scanner-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); filter: drop-shadow(0 0 10px var(--primary)); }
+    .scanner-wrap circle { fill: none; stroke-width: 8; stroke-linecap: round; }
+    .circle-bg { stroke: rgba(255,255,255,0.1); }
+    .circle-progress { stroke: var(--primary); stroke-dasharray: 408; stroke-dashoffset: 408; transition: stroke-dashoffset 0.1s linear; }
+    .fingerprint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 50px; animation: pulse 2s infinite; pointer-events: none; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 15px var(--primary)); } }
+    
+    /* شريط التسامح التفاعلي */
+    .slider-container { margin: 30px 0; }
+    .mood-slider {
+      -webkit-appearance: none; width: 100%; height: 12px; border-radius: 10px;
+      background: linear-gradient(to right, #ff0040, #ff007f, #b300ff, #00f0ff);
+      outline: none; transition: 0.2s; box-shadow: 0 0 15px rgba(255,255,255,0.1);
     }
-    .wheel:after { content: "قرار"; position: absolute; inset: 34%; display: grid; place-items: center; background: white; color: #32152d; border-radius: 50%; font-size: 28px; font-weight: 900; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
-    .wheelText { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-weight: 900; color: #32152d; text-shadow: 0 1px 0 rgba(255,255,255,.7); font-size: 18px; transform: rotate(var(--r)); }
-    .wheelText span { transform: translateY(-115px) rotate(calc(-1 * var(--r))); display: block; background: rgba(255,255,255,.75); padding: 4px 8px; border-radius: 999px; }
-    
-    /* Maze Styles */
-    .maze-container { width: 100%; overflow-x: auto; padding-bottom: 10px; }
-    .maze { width: 520px; height: 360px; margin: 0 auto; position: relative; background: rgba(255,255,255,.09); border: 2px solid var(--line); border-radius: 22px; overflow: hidden; flex-shrink: 0; }
-    .wall { position: absolute; background: rgba(255,255,255,.72); border-radius: 999px; box-shadow: 0 0 16px rgba(255,255,255,.18); }
-    .player { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--pink), var(--gold)); display: grid; place-items: center; box-shadow: 0 8px 18px rgba(0,0,0,.25); transition: .18s; z-index: 5; font-size: 18px; }
-    .door { position: absolute; padding: 9px 10px; border-radius: 12px; font-size: 13px; font-weight: 900; z-index: 4; border: 1px solid rgba(255,255,255,.3); }
-    .goodDoor { right: 15px; bottom: 16px; background: rgba(113,240,186,.22); color: #d7ffef; }
-    .badDoor { left: 15px; top: 16px; background: rgba(255,107,125,.2); color: #ffdce2; }
-    .closed { position: absolute; left: 72px; top: 78px; background: #ff6b7d; color: white; border-radius: 14px; padding: 8px 10px; font-size: 12px; transform: rotate(-7deg); z-index: 6; }
-    .mazeControls { display: grid; grid-template-columns: 58px 58px 58px; gap: 8px; justify-content: center; margin-top: 15px; direction: ltr; }
-    .mazeControls button { padding: 12px; min-width: 58px; }
-    .mazeControls .empty { visibility: hidden; }
-    
-    /* Images & Meter */
-    .sadImg, .finalImg { width: min(430px, 100%); border-radius: 24px; border: 1px solid var(--line); box-shadow: 0 18px 44px rgba(0,0,0,.35); margin: 14px auto; display: block; object-fit: cover; }
-    .sadImg.shake { animation: shake .5s infinite; }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px) rotate(-1deg); } 75% { transform: translateX(3px) rotate(1deg); } }
-    .meter { height: 18px; border-radius: 999px; background: rgba(255,255,255,.13); overflow: hidden; border: 1px solid var(--line); margin: 18px auto; width: min(420px, 100%); }
-    .meter span { display: block; height: 100%; width: 97%; background: linear-gradient(90deg, #ff6b7d, #ffd36b); border-radius: 999px; animation: fill 1s ease; }
-    @keyframes fill { from { width: 0; } to { width: 97%; } }
-    
-    /* Effects */
-    .hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
-    .heart { position: absolute; bottom: -30px; animation: floatUp 4.5s linear forwards; opacity: .9; pointer-events: none; }
-    @keyframes floatUp { to { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
-    .confetti { position: fixed; width: 10px; height: 16px; top: -20px; animation: fall 3s linear forwards; z-index: 11; border-radius: 3px; pointer-events: none; }
-    @keyframes fall { to { transform: translateY(110vh) rotate(600deg); opacity: 0; } }
+    .mood-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 30px; height: 30px;
+      border-radius: 50%; background: #fff; cursor: pointer;
+      box-shadow: 0 0 20px #fff; transition: transform 0.1s;
+    }
+    .mood-slider::-webkit-slider-thumb:active { transform: scale(1.2); }
+    .mood-label { display: flex; justify-content: space-between; font-size: 14px; margin-top: 10px; font-weight: bold; color: rgba(255,255,255,0.6); }
+
+    /* التحكم بالتنقل بين الشاشات */
+    .scene { display: none; opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease; transform: translateY(20px); }
+    .scene.active { display: block; opacity: 1; transform: translateY(0); }
   </style>
 </head>
 <body>
-  <div class="hearts" id="hearts"></div>
-  <main class="stage">
-    <section class="card" id="app"></section>
+  
+  <canvas id="canvas-bg"></canvas>
+
+  <main class="app-container" id="app-box">
+    
+    <div class="scene active" id="scene-1">
+      <div style="font-size: 60px; margin-bottom: 10px;">🛡️</div>
+      <h1>محكمة الزعل العليا</h1>
+      <p class="typewriter" id="typing-text">جاري الاتصال بنظام تحليل المشاعر...</p>
+      <div style="margin-top: 30px;">
+        <button class="btn btn-solid" onclick="goToScene(2)">بدء البروتوكول</button>
+      </div>
+    </div>
+
+    <div class="scene" id="scene-2">
+      <h1>تحقق الهوية العاطفية</h1>
+      <p>اضغط باستمرار على المستشعر لتأكيد النية الصافية وتجاوز حالة الزعل.</p>
+      
+      <div class="scanner-wrap" id="scanner">
+        <svg viewBox="0 0 140 140">
+          <circle class="circle-bg" cx="70" cy="70" r="65"></circle>
+          <circle class="circle-progress" id="progress-ring" cx="70" cy="70" r="65"></circle>
+        </svg>
+        <div class="fingerprint">👆</div>
+      </div>
+      <p id="scan-status" style="color: var(--primary); font-weight: bold;">بانتظار اللمس...</p>
+    </div>
+
+    <div class="scene" id="scene-3">
+      <h1>مؤشر تصفية القلوب</h1>
+      <p>اسحب المؤشر إلى النهاية لرفع نسبة التسامح وتغيير الأجواء.</p>
+      
+      <div class="slider-container">
+        <input type="range" min="0" max="100" value="0" class="mood-slider" id="mood-slider">
+        <div class="mood-label">
+          <span>غضب 😠</span>
+          <span id="slider-val">0%</span>
+          <span>رضا تام 😇</span>
+        </div>
+      </div>
+      <button class="btn btn-solid" id="final-btn" style="opacity: 0.5; pointer-events: none;" onclick="goToScene(4)">اعتماد التسوية</button>
+    </div>
+
+    <div class="scene" id="scene-4">
+      <div style="font-size: 70px; margin-bottom: 10px;">💖</div>
+      <h1 style="color: var(--secondary)">تم إغلاق الملف!</h1>
+      <p>تمت استعادة التواصل بنجاح.<br>لا مجال للزعل في هذا النظام بعد الآن.</p>
+      <button class="btn" style="margin-top: 20px; border-color: var(--secondary); color: var(--secondary); box-shadow: 0 0 20px var(--secondary)" onclick="location.reload()">إعادة التشغيل</button>
+    </div>
+
   </main>
 
   <script>
-    const app = document.getElementById('app');
-    const hearts = document.getElementById('hearts');
-    let mazeX = 22, mazeY = 302;
-    let isSpinning = false; // لمنع تعليق العجلة
+    // ---------------------------------------------------
+    // 1. نظام محرك الجزيئات (Particle Engine) عبر Canvas
+    // ---------------------------------------------------
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let w, h;
 
-    const set = (html) => { 
-      app.classList.remove('fade'); 
-      void app.offsetWidth; // Trigger reflow
-      app.classList.add('fade'); 
-      app.innerHTML = html; 
-    };
-    
-    const btn = (text, cls, fn, id="") => `<button ${id ? `id="${id}"` : ""} class="${cls||''}" onclick="${fn}">${text}</button>`;
+    function resizeCanvas() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    function start(){
-      set(`
-        <div class="court">⚖️</div>
-        <span class="badge">ملف رقم: #2026-R</span>
-        <h1>محكمة الزعل</h1>
-        <p>تم استلام طلب مراجعة حالة انقطاع التواصل.</p>
-        <p class="small">يرجى متابعة الإجراءات حتى صدور القرار النهائي.</p>
-        <div class="casebox">
-          <div><b>نوع الملف:</b><br>مراجعة خلاف شخصي</div>
-          <div><b>الحالة الحالية:</b><br>قيد الدراسة</div>
-        </div>
-        <div class="btns">${btn('بدء المراجعة', 'primary', 'questionOne()')}</div>
-      `);
+    class Particle {
+      constructor(x, y, isFirework = false) {
+        this.x = x; this.y = y;
+        this.isFirework = isFirework;
+        this.size = Math.random() * (isFirework ? 4 : 2) + 1;
+        this.vx = (Math.random() - 0.5) * (isFirework ? 15 : 2);
+        this.vy = (Math.random() - 0.5) * (isFirework ? 15 : 2) - (isFirework ? 2 : -0.5);
+        this.life = 1;
+        this.decay = Math.random() * 0.02 + 0.01;
+        this.color = `hsl(${Math.random() * 60 + 320}, 100%, 60%)`; // تدرجات الوردي والأحمر
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy;
+        if(this.isFirework) this.vy += 0.2; // جاذبية
+        this.life -= this.decay;
+      }
+      draw() {
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        if(this.isFirework) {
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        } else {
+          // رسم قلوب صغيرة بدلاً من دوائر في الوضع الهادئ
+          ctx.fillText('💖', this.x, this.y);
+        }
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
     }
 
-    function questionOne(){
-      set(`
-        <span class="badge">المرحلة ١: جمع المعلومات</span>
-        <h1>يرجى تحديد سبب تقديم الشكوى</h1>
-        <p>اختر الخيار الأقرب، دون الحاجة إلى شرح طويل.</p>
-        <div class="btns">
-          ${btn('السبب غير واضح', 'choice', 'answer()')}
-          ${btn('تم نسيان التفاصيل', 'choice', 'answer()')}
-          ${btn('الموضوع يحتاج مراجعة', 'choice', 'answer()')}
-        </div>
-      `);
+    function animateParticles() {
+      ctx.clearRect(0, 0, w, h);
+      // إضافة جزيئات عائمة بالخلفية بشكل مستمر
+      if(Math.random() < 0.05 && particles.length < 50) {
+        particles.push(new Particle(Math.random() * w, -10));
+      }
+      for(let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if(particles[i].life <= 0) particles.splice(i, 1);
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    function fireworkExplosion(x, y) {
+      for(let i = 0; i < 100; i++) {
+        particles.push(new Particle(x, y, true));
+      }
     }
 
-    function answer(){
-      set(`
-        <span class="badge">تم تسجيل الإفادة</span>
-        <h1>هل ما زالت القضية تستحق الاستمرار؟</h1>
-        <p>سيتم اعتماد الإجابة ضمن تقرير المراجعة.</p>
-        <div class="btns">
-          ${btn('نعم', 'choice primary', 'jury()')}
-          ${btn('ربما', 'choice primary', 'jury()')}
-          ${btn('غير متأكد', 'choice primary', 'jury()')}
-        </div>
-        <p class="small">ملاحظة: سيتم تحليل الإجابة وفق مصلحة الطرفين.</p>
-      `);
-    }
-
-    function jury(){
-      set(`
-        <span class="badge">المرحلة ٢: لجنة المراجعة</span>
-        <h1>انتهت المداولات</h1>
-        <div class="jury">
-          <div class="juror"><b>📄</b><span>لا يوجد سبب كافٍ للاستمرار.</span></div>
-          <div class="juror"><b>⚖️</b><span>الملف قابل للإغلاق.</span></div>
-          <div class="juror"><b>🕊️</b><span>التسوية هي الخيار الأنسب.</span></div>
-        </div>
-        <p>لم تجد لجنة المراجعة مبرراً كافياً لاستمرار النزاع.</p>
-        <div class="btns">
-          ${btn('اعتماد القرار', 'primary', 'finalScene()')}
-          ${btn('تقديم اعتراض', 'danger', 'wheelScene()')}
-        </div>
-      `);
-    }
-
-    function wheelScene(){
-      isSpinning = false;
-      set(`
-        <span class="badge">المرحلة ٣: الاعتراض</span>
-        <h1>آلية اختيار محايدة</h1>
-        <p>سيتم تحويل الاعتراض إلى عجلة القرار لإصدار نتيجة نهائية.</p>
-        <div class="wheelWrap">
-          <div class="pointer">▼</div>
-          <div class="wheel" id="wheel">
-            <div class="wheelText" style="--r:0deg"><span>إغلاق الملف</span></div>
-            <div class="wheelText" style="--r:60deg"><span>فتح تواصل</span></div>
-            <div class="wheelText" style="--r:120deg"><span>فرصة جديدة</span></div>
-            <div class="wheelText" style="--r:180deg"><span>إنهاء الخلاف</span></div>
-            <div class="wheelText" style="--r:240deg"><span>تسوية</span></div>
-            <div class="wheelText" style="--r:300deg"><span>قبول القرار</span></div>
-          </div>
-        </div>
-        <div class="btns">${btn('تشغيل العجلة', 'primary', 'spinWheel()', 'spinBtn')}</div>
-      `);
-    }
-
-    function spinWheel(){
-      if(isSpinning) return;
-      isSpinning = true;
-      document.getElementById('spinBtn').disabled = true;
-      
-      const w = document.getElementById('wheel');
-      w.style.transform = 'rotate(2160deg)';
-      
+    // ---------------------------------------------------
+    // 2. إدارة التنقل بين المشاهد
+    // ---------------------------------------------------
+    function goToScene(num) {
+      document.querySelectorAll('.scene').forEach(el => {
+        el.classList.remove('active');
+        setTimeout(() => el.style.display = 'none', 400); // انتظار انتهاء الأنيميشن
+      });
       setTimeout(() => {
-        set(`
-          <span class="badge">نتيجة الاعتراض</span>
-          <h1>النتيجة: إغلاق الخلاف</h1>
-          <p>تمت مراجعة الاعتراض، ولم تتغير التوصية الأساسية.</p>
-          <div class="btns">
-            ${btn('اعتماد النتيجة', 'primary', 'finalScene()')}
-            ${btn('متابعة الاعتراض', 'danger', 'mazeScene()')}
-          </div>
-        `);
-      }, 4300);
+        const next = document.getElementById(`scene-${num}`);
+        next.style.display = 'block';
+        setTimeout(() => next.classList.add('active'), 10);
+        
+        if(num === 4) { // إذا وصلنا للمشهد النهائي
+          document.body.style.backgroundColor = '#0a1020';
+          document.documentElement.style.setProperty('--primary', '#00f0ff');
+          setInterval(() => fireworkExplosion(Math.random() * w, h/2 + (Math.random()-0.5)*h), 800);
+          fireworkExplosion(w/2, h/2);
+        }
+      }, 400);
     }
 
-    function mazeScene(){
-      mazeX = 22; mazeY = 302;
-      set(`
-        <span class="badge">المرحلة ٤: مسار الاعتراض</span>
-        <h1>يرجى اختيار المسار النهائي</h1>
-        <p>المسار البديل متاح شكلياً، لكن قد لا يكون قابلاً للتنفيذ.</p>
-        <div class="maze-container" dir="ltr">
-          <div class="maze" id="maze">
-            <div class="door badDoor">🚪 استمرار</div>
-            <div class="door goodDoor">🚪 إغلاق</div>
-            <div class="closed">غير متاح حالياً</div>
-            <div class="wall" style="left:0;top:0;width:100%;height:8px"></div>
-            <div class="wall" style="left:0;bottom:0;width:100%;height:8px"></div>
-            <div class="wall" style="left:0;top:0;width:8px;height:100%"></div>
-            <div class="wall" style="right:0;top:0;width:8px;height:100%"></div>
-            <div class="wall" style="left:70px;top:55px;width:8px;height:245px"></div>
-            <div class="wall" style="left:70px;top:55px;width:250px;height:8px"></div>
-            <div class="wall" style="left:145px;top:115px;width:290px;height:8px"></div>
-            <div class="wall" style="left:145px;top:115px;width:8px;height:165px"></div>
-            <div class="wall" style="left:220px;top:178px;width:250px;height:8px"></div>
-            <div class="wall" style="left:220px;top:178px;width:8px;height:110px"></div>
-            <div class="wall" style="left:300px;top:240px;width:165px;height:8px"></div>
-            <div class="player" id="player">💗</div>
-          </div>
-        </div>
-        <div class="mazeControls">
-          <button class="empty">.</button><button onclick="moveMaze(0,-42)">⬆</button><button class="empty">.</button>
-          <button onclick="moveMaze(-42,0)">⬅</button><button onclick="moveMaze(0,42)">⬇</button><button onclick="moveMaze(42,0)">➡</button>
-        </div>
-        <div class="btns">
-          ${btn('اختبار المسار البديل', 'danger', 'sadOne()')}
-          ${btn('اعتماد الإغلاق', 'primary', 'finalScene()')}
-        </div>
-      `);
-      drawPlayer();
-    }
+    // ---------------------------------------------------
+    // 3. خوارزمية "الضغط المطول" (Hold to Scan) - أداء عالي
+    // ---------------------------------------------------
+    const scanner = document.getElementById('scanner');
+    const ring = document.getElementById('progress-ring');
+    const scanStatus = document.getElementById('scan-status');
+    let scanProgress = 0;
+    let scanReqId = null;
+    let isScanning = false;
+    const TOTAL_LEN = 408; // محيط الدائرة r=65
 
-    function drawPlayer(){
-      const p = document.getElementById('player');
-      if(!p) return;
-      p.style.left = mazeX + 'px';
-      p.style.top = mazeY + 'px';
-    }
-
-    function moveMaze(dx, dy){
-      mazeX = Math.max(14, Math.min(470, mazeX + dx));
-      mazeY = Math.max(14, Math.min(308, mazeY + dy));
-      drawPlayer();
-      if(mazeX > 410 && mazeY > 260) finalScene();
-      if(mazeX < 85 && mazeY < 90) sadOne();
-    }
-
-    function sadOne(){
-      set(`
-        <span class="badge">المسار البديل</span>
-        <h1>تم استلام طلب الاستمرار بالخلاف</h1>
-        <p>تم إرفاق مستند إضافي ضمن الملف.</p>
-        <img class="sadImg" src="iwantyou.png" alt="I want you" onerror="this.style.display='none'">
-        <div class="btns">
-          ${btn('متابعة المراجعة', 'danger', 'sadTwo()')}
-          ${btn('العودة للقرار الأساسي', 'primary', 'finalScene()')}
-        </div>
-      `);
-    }
-
-    function sadTwo(){
-      set(`
-        <span class="badge">مستند إضافي</span>
-        <h1>تمت إضافة ملاحظة جديدة</h1>
-        <p>يرجى مراجعة المرفق قبل تثبيت الاعتراض.</p>
-        <img class="sadImg" src="imissyou.jpg" alt="I miss you" onerror="this.style.display='none'">
-        <div class="btns">
-          ${btn('تثبيت الاعتراض', 'danger', 'sadThree()')}
-          ${btn('إلغاء الاعتراض', 'primary', 'finalScene()')}
-        </div>
-      `);
-    }
-
-    function sadThree(){
-      set(`
-        <span class="badge">نتيجة المراجعة</span>
-        <h1>تم تسجيل الملاحظة</h1>
-        <img class="sadImg shake" src="imissyou.jpg" alt="I miss you" onerror="this.style.display='none'">
-        <p>مؤشر صعوبة استمرار الخلاف:</p>
-        <div class="meter"><span></span></div>
-        <h1>97%</h1>
-        <p>بعد مراجعة جميع البيانات، لم يتم العثور على مبرر كافٍ لاستمرار هذه القضية.</p>
-        <div class="btns">
-          ${btn('إغلاق الملف', 'primary', 'finalScene()')}
-        </div>
-      `);
-    }
-
-    function finalScene(){
-      burstHearts(); confetti();
-      set(`
-        <span class="badge">القرار النهائي</span>
-        <h1>تم إغلاق الملف</h1>
-        <p>بعد مراجعة الأدلة، الشهادات، الاعتراض، العجلة، والمسار البديل، تقرر إنهاء الخلاف.</p>
-        <img class="finalImg" src="result.png" alt="final result" onerror="this.style.display='none'">
-        <p>حالة القضية: مغلقة. لا توجد إجراءات إضافية مطلوبة.</p>
-        <div class="btns">
-          ${btn('اعتماد القرار', 'primary', 'doneScene()')}
-          ${btn('إعادة المراجعة', 'ghost', 'start()')}
-        </div>
-      `);
-    }
-
-    function doneScene(){
-      burstHearts(); confetti();
-      set(`
-        <div class="court">🕊️</div>
-        <h1>تم اعتماد القرار بنجاح</h1>
-        <p>تم نقل الملف إلى الأرشيف، وإغلاق جميع نقاط الخلاف.</p>
-        <p class="small">نتمنى للطرفين تواصلاً أهدأ وقرارات أفضل.</p>
-        <div class="btns">${btn('البدء من جديد', 'primary', 'start()')}</div>
-      `);
-    }
-
-    function burstHearts(){
-      for(let i=0; i<25; i++){
-        const h = document.createElement('div');
-        h.className = 'heart'; 
-        h.textContent = ['❤️','💗','💕','💞','🕊️'][Math.floor(Math.random()*5)];
-        h.style.left = Math.random() * 100 + 'vw'; 
-        h.style.animationDelay = (Math.random() * 1.2) + 's'; 
-        h.style.fontSize = (18 + Math.random() * 24) + 'px';
-        hearts.appendChild(h); 
-        setTimeout(() => h.remove(), 5500);
+    function updateScan() {
+      if(isScanning) {
+        scanProgress += 1.2; // سرعة التعبئة
+        scanStatus.innerText = `جاري الفحص: ${Math.min(100, Math.floor((scanProgress/100)*100))}%`;
+        ring.style.strokeDashoffset = TOTAL_LEN - (scanProgress / 100) * TOTAL_LEN;
+        
+        if(scanProgress >= 100) {
+          scanStatus.innerText = "تم التحقق بنجاح! ✔️";
+          ring.style.stroke = "#00f0ff";
+          setTimeout(() => goToScene(3), 800);
+          return;
+        }
+      } else {
+        scanProgress -= 3; // تفريغ أسرع عند الإفلات
+        if(scanProgress < 0) scanProgress = 0;
+        ring.style.strokeDashoffset = TOTAL_LEN - (scanProgress / 100) * TOTAL_LEN;
+        if(scanProgress === 0) {
+          scanStatus.innerText = "بانتظار اللمس...";
+          return; // إيقاف الأنيميشن عند الصفر
+        }
       }
+      scanReqId = requestAnimationFrame(updateScan);
     }
 
-    function confetti(){
-      for(let i=0; i<45; i++){
-        const c = document.createElement('div'); 
-        c.className = 'confetti';
-        c.style.left = Math.random() * 100 + 'vw'; 
-        c.style.background = ['#ff5fa2','#ffd36b','#71f0ba','#9d7cff','#fff'][Math.floor(Math.random()*5)];
-        c.style.animationDelay = (Math.random() * 1) + 's'; 
-        document.body.appendChild(c); 
-        setTimeout(() => c.remove(), 4200);
+    const startScan = (e) => { e.preventDefault(); isScanning = true; cancelAnimationFrame(scanReqId); updateScan(); };
+    const stopScan = (e) => { e.preventDefault(); isScanning = false; cancelAnimationFrame(scanReqId); updateScan(); };
+
+    // دعم اللمس والماوس
+    scanner.addEventListener('mousedown', startScan);
+    scanner.addEventListener('touchstart', startScan, {passive: false});
+    window.addEventListener('mouseup', stopScan);
+    window.addEventListener('touchend', stopScan);
+
+    // ---------------------------------------------------
+    // 4. التفاعل الديناميكي لشريط التسامح (Slider to CSS)
+    // ---------------------------------------------------
+    const slider = document.getElementById('mood-slider');
+    const sliderVal = document.getElementById('slider-val');
+    const finalBtn = document.getElementById('final-btn');
+    const appBox = document.getElementById('app-box');
+
+    slider.addEventListener('input', (e) => {
+      let v = e.target.value;
+      sliderVal.innerText = v + '%';
+      
+      // تحويل النسبة من (0 إلى 100) إلى ألوان (من الزهري الغاضب إلى السماوي الهادئ)
+      // تلاعب بالـ Hue Rotate لقلب ألوان الواجهة كاملة بشكل سحري
+      let hueVal = (v / 100) * 120; // يدور حتى 120 درجة
+      document.documentElement.style.setProperty('--primary', `hsl(${330 + hueVal}, 100%, 50%)`);
+      appBox.style.boxShadow = `0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px hsl(${330 + hueVal}, 100%, 50%, 0.2)`;
+      
+      if(v >= 100) {
+        finalBtn.style.opacity = '1';
+        finalBtn.style.pointerEvents = 'auto';
+        finalBtn.style.transform = 'scale(1.1)';
+        setTimeout(() => finalBtn.style.transform = 'scale(1)', 200);
+      } else {
+        finalBtn.style.opacity = '0.5';
+        finalBtn.style.pointerEvents = 'none';
       }
-    }
+    });
 
-    start();
   </script>
 </body>
 </html>
