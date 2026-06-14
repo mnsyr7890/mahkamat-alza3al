@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>محكمة الزعل</title>
+  <style>
+    :root{
+      --bg1:#1b1027; --bg2:#32152d; --pink:#ff5fa2; --hot:#ff2f7c;
+      --soft:#fff1f7; --card:rgba(255,255,255,.12); --line:rgba(255,255,255,.22);
+      --gold:#ffd36b; --green:#71f0ba; --red:#ff6b7d;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      margin:0; min-height:100vh; overflow-x:hidden; font-family:Tahoma,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(255,95,162,.35), transparent 34%),
+        radial-gradient(circle at 85% 18%, rgba(255,211,107,.22), transparent 28%),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+      color:white; display:flex; align-items:center; justify-content:center; padding:18px;
+    }
+    .stage{width:min(760px,100%); position:relative; z-index:2}
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:28px; padding:24px;
+      box-shadow:0 25px 70px rgba(0,0,0,.35); backdrop-filter:blur(14px); text-align:center;
+      animation:pop .45s ease;
+    }
+    @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+    .badge{display:inline-block;padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.1);font-size:14px;color:#ffe2ef}
+    h1{font-size:clamp(28px,7vw,52px); margin:18px 0 10px; line-height:1.2}
+    p{font-size:clamp(17px,4vw,22px); line-height:1.8; color:#ffe8f2; margin:10px 0}
+    .small{font-size:15px;color:#ffd9e8}
+    .btns{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:22px}
+    button{
+      border:0; border-radius:18px; padding:15px 22px; font-size:18px; font-weight:800; cursor:pointer;
+      color:#2b1022; background:linear-gradient(135deg,#fff,#ffd7ea); box-shadow:0 12px 26px rgba(0,0,0,.18);
+      transition:.2s transform,.2s filter,.2s opacity;
+    }
+    button:active{transform:scale(.96)}
+    .primary{background:linear-gradient(135deg,var(--pink),var(--gold));color:white;text-shadow:0 1px 4px rgba(0,0,0,.25)}
+    .danger{background:linear-gradient(135deg,#3b3140,#2a202e);color:#ffe3ec;border:1px solid rgba(255,255,255,.22)}
+    .ghost{background:rgba(255,255,255,.1);color:white;border:1px solid var(--line)}
+    .hidden{display:none!important}
+    .fade{animation:pop .35s ease}
+
+    .court{font-size:64px; filter:drop-shadow(0 10px 20px rgba(0,0,0,.25)); margin-top:8px}
+    .casebox{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0;text-align:right}
+    .casebox div{background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:16px;padding:12px;color:#ffe9f3}
+    @media(max-width:520px){.casebox{grid-template-columns:1fr}.card{padding:20px 15px}}
+
+    .choice{min-width:150px}
+    .jury{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+    .juror{background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:18px;padding:14px;min-height:110px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+    .juror b{font-size:34px}.juror span{font-size:15px;color:#ffe0ec}
+    @media(max-width:560px){.jury{grid-template-columns:1fr}}
+
+    .wheelWrap{display:flex;justify-content:center;margin:22px 0;position:relative}
+    .pointer{position:absolute;top:-8px;z-index:3;font-size:34px;filter:drop-shadow(0 4px 6px #000)}
+    .wheel{
+      width:min(330px,82vw);aspect-ratio:1;border-radius:50%;border:8px solid rgba(255,255,255,.75);
+      background:conic-gradient(#ff5fa2 0 60deg,#ffd36b 60deg 120deg,#9d7cff 120deg 180deg,#71f0ba 180deg 240deg,#ff8aa8 240deg 300deg,#ffe28c 300deg 360deg);
+      position:relative;box-shadow:0 20px 50px rgba(0,0,0,.35);transition:transform 4s cubic-bezier(.12,.85,.18,1);
+    }
+    .wheel:after{content:"صلح";position:absolute;inset:34%;display:grid;place-items:center;background:white;color:#32152d;border-radius:50%;font-size:28px;font-weight:900;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+    .wheelText{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-weight:900;color:#32152d;text-shadow:0 1px 0 rgba(255,255,255,.7);font-size:18px;transform:rotate(var(--r));}
+    .wheelText span{transform:translateY(-115px) rotate(calc(-1 * var(--r)));display:block;background:rgba(255,255,255,.75);padding:4px 8px;border-radius:999px}
+
+    .maze{width:min(520px,100%);height:360px;margin:18px auto;position:relative;background:rgba(255,255,255,.09);border:2px solid var(--line);border-radius:22px;overflow:hidden}
+    .wall{position:absolute;background:rgba(255,255,255,.72);border-radius:999px;box-shadow:0 0 16px rgba(255,255,255,.18)}
+    .player{position:absolute;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--gold));display:grid;place-items:center;box-shadow:0 8px 18px rgba(0,0,0,.25);transition:.18s;z-index:5}
+    .door{position:absolute;padding:9px 10px;border-radius:12px;font-size:13px;font-weight:900;z-index:4;border:1px solid rgba(255,255,255,.3)}
+    .goodDoor{right:15px;bottom:16px;background:rgba(113,240,186,.22);color:#d7ffef}
+    .badDoor{left:15px;top:16px;background:rgba(255,107,125,.2);color:#ffdce2}
+    .closed{position:absolute;left:72px;top:78px;background:#ff6b7d;color:white;border-radius:14px;padding:8px 10px;font-size:12px;transform:rotate(-7deg);z-index:6}
+    .mazeControls{display:grid;grid-template-columns:58px 58px 58px;gap:8px;justify-content:center;margin-top:8px;direction:ltr}
+    .mazeControls button{padding:12px;min-width:58px}
+    .mazeControls .empty{visibility:hidden}
+
+    .sadImg,.finalImg{width:min(430px,92%);border-radius:24px;border:1px solid var(--line);box-shadow:0 18px 44px rgba(0,0,0,.35);margin:14px auto;display:block}
+    .sadImg.shake{animation:shake .5s infinite}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px) rotate(-1deg)}75%{transform:translateX(3px) rotate(1deg)}}
+    .meter{height:18px;border-radius:999px;background:rgba(255,255,255,.13);overflow:hidden;border:1px solid var(--line);margin:18px auto;width:min(420px,90%)}
+    .meter span{display:block;height:100%;width:97%;background:linear-gradient(90deg,#ff6b7d,#ffd36b);border-radius:999px;animation:fill 1s ease}
+    @keyframes fill{from{width:0}to{width:97%}}
+
+    .hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:10}
+    .heart{position:absolute;bottom:-30px;font-size:24px;animation:floatUp 4.5s linear forwards;opacity:.9}
+    @keyframes floatUp{to{transform:translateY(-110vh) rotate(360deg);opacity:0}}
+    .confetti{position:fixed;width:10px;height:16px;top:-20px;animation:fall 3s linear forwards;z-index:11;border-radius:3px}
+    @keyframes fall{to{transform:translateY(110vh) rotate(600deg);opacity:0}}
+  </style>
+</head>
+<body>
+  <div class="hearts" id="hearts"></div>
+  <main class="stage">
+    <section class="card" id="app"></section>
+  </main>
+
+  <script>
+    const app = document.getElementById('app');
+    const hearts = document.getElementById('hearts');
+    let mazeX = 22, mazeY = 302;
+
+    const set = (html) => { app.classList.remove('fade'); void app.offsetWidth; app.classList.add('fade'); app.innerHTML = html; };
+    const btn = (text, cls, fn) => `<button class="${cls||''}" onclick="${fn}">${text}</button>`;
+
+    function start(){
+      set(`
+        <div class="court">⚖️</div>
+        <span class="badge">ملف رقم: #2026-صلح</span>
+        <h1>محكمة الزعل</h1>
+        <p>السلام عليكم… تم فتح قضية زعل رسمية بحقكم.</p>
+        <p class="small">القاضي حاضر، الشهود حاضرين، وباقي بس نعرف: الزعل إله داعي لو لا؟</p>
+        <div class="casebox">
+          <div><b>نوع القضية:</b><br>استمرار زعل غير مبرر</div>
+          <div><b>الحكم المتوقع:</b><br>صلح فوري مع شوية دلال</div>
+        </div>
+        <div class="btns">${btn('بدء المحاكمة', 'primary', 'questionOne()')}</div>
+      `);
+    }
+
+    function questionOne(){
+      set(`
+        <span class="badge">المرحلة ١: الاستجواب</span>
+        <h1>شنو سبب الزعل؟</h1>
+        <p>اختار بصراحة… المحكمة ما تحاسب، بس تضحك شوي.</p>
+        <div class="btns">
+          ${btn('مدري بس زعلان', 'choice', 'answer(1)')}
+          ${btn('نسيت السبب', 'choice', 'answer(1)')}
+          ${btn('سبب مهم بس ما أگول', 'choice', 'answer(1)')}
+        </div>
+      `);
+    }
+
+    function answer(){
+      set(`
+        <span class="badge">تم تسجيل الإفادة</span>
+        <h1>سؤال ثاني مهم</h1>
+        <p>هل مشتاق لو لا؟</p>
+        <div class="btns">
+          ${btn('مشتاق', 'choice primary', 'jury()')}
+          ${btn('هواي', 'choice primary', 'jury()')}
+          ${btn('بس أكابر', 'choice primary', 'jury()')}
+        </div>
+        <p class="small">ملاحظة: كل الإجابات وصلت للمحكمة بنفس المعنى.</p>
+      `);
+    }
+
+    function jury(){
+      set(`
+        <span class="badge">المرحلة ٢: هيئة المحلفين</span>
+        <h1>رأي الشهود</h1>
+        <div class="jury">
+          <div class="juror"><b>🐥</b><span>أشوف يتصالحون.</span></div>
+          <div class="juror"><b>🐱</b><span>آني ويا الصلح، بلا عناد.</span></div>
+          <div class="juror"><b>🧸</b><span>الزعل مو لايق عليهم أصلاً.</span></div>
+        </div>
+        <p>تم التصويت بالإجماع: الصلح هو الحل.</p>
+        <div class="btns">
+          ${btn('أقبل الحكم', 'primary', 'finalScene()')}
+          ${btn('أريد أستأنف القرار', 'danger', 'wheelScene()')}
+        </div>
+      `);
+    }
+
+    function wheelScene(){
+      set(`
+        <span class="badge">المرحلة ٣: الاستئناف</span>
+        <h1>لف عجلة المصير</h1>
+        <p>حتى لا تگول الحكم كان جاهز… خلي العجلة تقرر.</p>
+        <div class="wheelWrap">
+          <div class="pointer">▼</div>
+          <div class="wheel" id="wheel">
+            <div class="wheelText" style="--r:0deg"><span>نتصالح</span></div>
+            <div class="wheelText" style="--r:60deg"><span>نرجع نحچي</span></div>
+            <div class="wheelText" style="--r:120deg"><span>فرصة ثانية</span></div>
+            <div class="wheelText" style="--r:180deg"><span>بلا زعل</span></div>
+            <div class="wheelText" style="--r:240deg"><span>صلح</span></div>
+            <div class="wheelText" style="--r:300deg"><span>قلوب</span></div>
+          </div>
+        </div>
+        <div class="btns">${btn('لف العجلة', 'primary', 'spinWheel()')}</div>
+      `);
+    }
+
+    function spinWheel(){
+      const w = document.getElementById('wheel');
+      w.style.transform = 'rotate(2160deg)';
+      setTimeout(()=>{
+        set(`
+          <span class="badge">نتيجة الاستئناف</span>
+          <h1>العجلة حكمت: نرجع مثل قبل ❤️</h1>
+          <p>النتيجة طلعت رسمية… بس إذا تريد تعترض بعد، المحكمة فاتحة متاهة خاصة للمعاندين.</p>
+          <div class="btns">
+            ${btn('تمام، ننهيها صلح', 'primary', 'finalScene()')}
+            ${btn('أعترض وأدخل المتاهة', 'danger', 'mazeScene()')}
+          </div>
+        `);
+      }, 4200);
+    }
+
+    function mazeScene(){
+      mazeX = 22; mazeY = 302;
+      set(`
+        <span class="badge">المرحلة ٤: متاهة الاعتراض</span>
+        <h1>وصل للباب المناسب</h1>
+        <p>باب الزعل موجود… بس الطريق إله مو سهل.</p>
+        <div class="maze" id="maze">
+          <div class="door badDoor">🚪 أبقى زعلان</div>
+          <div class="door goodDoor">🚪 أتصالح</div>
+          <div class="closed">مغلق للصيانة</div>
+          <div class="wall" style="left:0;top:0;width:100%;height:8px"></div>
+          <div class="wall" style="left:0;bottom:0;width:100%;height:8px"></div>
+          <div class="wall" style="left:0;top:0;width:8px;height:100%"></div>
+          <div class="wall" style="right:0;top:0;width:8px;height:100%"></div>
+          <div class="wall" style="left:70px;top:55px;width:8px;height:245px"></div>
+          <div class="wall" style="left:70px;top:55px;width:250px;height:8px"></div>
+          <div class="wall" style="left:145px;top:115px;width:290px;height:8px"></div>
+          <div class="wall" style="left:145px;top:115px;width:8px;height:165px"></div>
+          <div class="wall" style="left:220px;top:178px;width:250px;height:8px"></div>
+          <div class="wall" style="left:220px;top:178px;width:8px;height:110px"></div>
+          <div class="wall" style="left:300px;top:240px;width:165px;height:8px"></div>
+          <div class="player" id="player">💗</div>
+        </div>
+        <div class="mazeControls">
+          <button class="empty">.</button><button onclick="moveMaze(0,-42)">⬆</button><button class="empty">.</button>
+          <button onclick="moveMaze(-42,0)">⬅</button><button onclick="moveMaze(0,42)">⬇</button><button onclick="moveMaze(42,0)">➡</button>
+        </div>
+        <div class="btns">
+          ${btn('أروح لطريق الزعل', 'danger', 'sadOne()')}
+          ${btn('اختصرها صلح', 'primary', 'finalScene()')}
+        </div>
+      `);
+      drawPlayer();
+    }
+
+    function drawPlayer(){
+      const p = document.getElementById('player');
+      if(!p) return;
+      p.style.left = mazeX + 'px';
+      p.style.top = mazeY + 'px';
+    }
+
+    function moveMaze(dx,dy){
+      mazeX = Math.max(14, Math.min(470, mazeX + dx));
+      mazeY = Math.max(14, Math.min(308, mazeY + dy));
+      drawPlayer();
+      if(mazeX > 410 && mazeY > 260) finalScene();
+      if(mazeX < 85 && mazeY < 90) sadOne();
+    }
+
+    function sadOne(){
+      set(`
+        <span class="badge">طريق الزعل</span>
+        <h1>المحكمة أخذت اعتراضك بنظر الاعتبار…</h1>
+        <p>بس أكو ملاحظة صغيرة.</p>
+        <img class="sadImg" src="iwantyou.png" alt="I want you">
+        <div class="btns">
+          ${btn('كمل الاعتراض', 'danger', 'sadTwo()')}
+          ${btn('لا لا، صلح أحسن', 'primary', 'finalScene()')}
+        </div>
+      `);
+    }
+
+    function sadTwo(){
+      set(`
+        <span class="badge">تنبيه عاطفي</span>
+        <h1>قبل ما نكمل…</h1>
+        <p>أكو جهة متضررة من استمرار الزعل.</p>
+        <img class="sadImg" src="imissyou.jpg" alt="I miss you">
+        <div class="btns">
+          ${btn('ما يهمني', 'danger', 'sadThree()')}
+          ${btn('يهمني… خل نصالح', 'primary', 'finalScene()')}
+        </div>
+      `);
+    }
+
+    function sadThree(){
+      set(`
+        <span class="badge">تم تسجيل جوابك</span>
+        <h1>بس بصراحة… هذا الجواب يوجع شوي</h1>
+        <img class="sadImg shake" src="imissyou.jpg" alt="I miss you">
+        <p>مستوى الدراما:</p>
+        <div class="meter"><span></span></div>
+        <h1>97%</h1>
+        <p>بعد مراجعة القضية، تبين أن الطرفين مشتاقين.</p>
+        <div class="btns">
+          ${btn('خل نرجع نحچي 😔❤️', 'primary', 'finalScene()')}
+        </div>
+      `);
+    }
+
+    function finalScene(){
+      burstHearts(); confetti();
+      set(`
+        <span class="badge">الحكم النهائي</span>
+        <h1>حكمت المحكمة بالصلح فوراً ❤️</h1>
+        <p>بعد مراجعة الأدلة والشهود والمحلفين والمتاهة والعجلة… تبين أن الزعل غير مدعوم حالياً.</p>
+        <img class="finalImg" src="result.png" alt="final image">
+        <p>تم تفعيل وضع الصلح بنجاح. بلا عناد بعد، اتفقنا؟</p>
+        <div class="btns">
+          ${btn('تنفيذ الحكم 😌', 'primary', 'doneScene()')}
+          ${btn('إعادة المحاكمة', 'ghost', 'start()')}
+        </div>
+      `);
+    }
+
+    function doneScene(){
+      burstHearts(); confetti();
+      set(`
+        <div class="court">💞</div>
+        <h1>تم تنفيذ الحكم بنجاح</h1>
+        <p>تم إغلاق ملف الزعل، وفتح ملف الحچي الحلو.</p>
+        <p class="small">نتمنى لكم حياة خالية من الدراما… قدر الإمكان.</p>
+        <div class="btns">${btn('أعيدها من البداية', 'primary', 'start()')}</div>
+      `);
+    }
+
+    function burstHearts(){
+      for(let i=0;i<28;i++){
+        const h=document.createElement('div');
+        h.className='heart'; h.textContent=['❤️','💗','💕','💞','🥹'][Math.floor(Math.random()*5)];
+        h.style.left=Math.random()*100+'vw'; h.style.animationDelay=(Math.random()*1.2)+'s'; h.style.fontSize=(18+Math.random()*24)+'px';
+        hearts.appendChild(h); setTimeout(()=>h.remove(),5200);
+      }
+    }
+    function confetti(){
+      for(let i=0;i<55;i++){
+        const c=document.createElement('div'); c.className='confetti';
+        c.style.left=Math.random()*100+'vw'; c.style.background=['#ff5fa2','#ffd36b','#71f0ba','#9d7cff','#fff'][Math.floor(Math.random()*5)];
+        c.style.animationDelay=(Math.random()*1)+'s'; document.body.appendChild(c); setTimeout(()=>c.remove(),4200);
+      }
+    }
+
+    start();
+  </script>
+</body>
+</html>
