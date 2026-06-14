@@ -1,734 +1,361 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>The Grudge Court</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>محكمة الزعل</title>
   <style>
-    :root{
-      --bg1:#15111f;
-      --bg2:#291638;
-      --card:#ffffff;
-      --ink:#1f1b2e;
-      --soft:#7b6a88;
-      --pink:#ff4f8b;
-      --purple:#7c4dff;
-      --gold:#ffd166;
-      --green:#2ecc71;
-      --red:#ff5c7a;
+    :root {
+      --bg1: #1b1027; --bg2: #32152d; --pink: #ff5fa2; --hot: #ff2f7c;
+      --soft: #fff1f7; --card: rgba(255, 255, 255, .12); --line: rgba(255, 255, 255, .22);
+      --gold: #ffd36b; --green: #71f0ba; --red: #ff6b7d;
     }
-
-    *{box-sizing:border-box}
-
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      color:var(--ink);
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; min-height: 100vh; overflow-x: hidden; font-family: Tahoma, Arial, sans-serif;
       background:
-        radial-gradient(circle at 20% 15%, rgba(255,79,139,.35), transparent 28%),
-        radial-gradient(circle at 80% 5%, rgba(124,77,255,.35), transparent 28%),
+        radial-gradient(circle at 18% 20%, rgba(255,95,162,.35), transparent 34%),
+        radial-gradient(circle at 85% 18%, rgba(255,211,107,.22), transparent 28%),
         linear-gradient(135deg, var(--bg1), var(--bg2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      overflow:hidden;
+      color: white; display: flex; align-items: center; justify-content: center; padding: 18px;
     }
-
-    .floating-bg{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      overflow:hidden;
-      z-index:0;
+    .stage { width: min(760px, 100%); position: relative; z-index: 2; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 28px; padding: 24px;
+      box-shadow: 0 25px 70px rgba(0,0,0,.35); backdrop-filter: blur(14px); text-align: center;
+      animation: pop .45s ease;
     }
-
-    .bubble{
-      position:absolute;
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      background:rgba(255,255,255,.12);
-      animation: floatUp linear infinite;
+    @keyframes pop { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .badge { display: inline-block; padding: 9px 14px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.1); font-size: 14px; color: #ffe2ef; }
+    h1 { font-size: clamp(28px, 7vw, 52px); margin: 18px 0 10px; line-height: 1.2; }
+    p { font-size: clamp(17px, 4vw, 22px); line-height: 1.8; color: #ffe8f2; margin: 10px 0; }
+    .small { font-size: 15px; color: #ffd9e8; }
+    .btns { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 22px; }
+    button {
+      border: 0; border-radius: 18px; padding: 15px 22px; font-size: 18px; font-weight: 800; cursor: pointer;
+      color: #2b1022; background: linear-gradient(135deg, #fff, #ffd7ea); box-shadow: 0 12px 26px rgba(0,0,0,.18);
+      transition: .2s transform, .2s filter, .2s opacity;
     }
-
-    @keyframes floatUp{
-      from{transform:translateY(110vh) scale(.6); opacity:.1}
-      35%{opacity:.7}
-      to{transform:translateY(-20vh) scale(1.5); opacity:0}
+    button:active:not(:disabled) { transform: scale(.96); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .primary { background: linear-gradient(135deg, var(--pink), var(--gold)); color: white; text-shadow: 0 1px 4px rgba(0,0,0,.25); }
+    .danger { background: linear-gradient(135deg, #3b3140, #2a202e); color: #ffe3ec; border: 1px solid rgba(255,255,255,.22); }
+    .ghost { background: rgba(255,255,255,.1); color: white; border: 1px solid var(--line); }
+    .fade { animation: pop .35s ease; }
+    .court { font-size: 64px; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); margin-top: 8px; }
+    .casebox { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; text-align: right; }
+    .casebox div { background: rgba(255,255,255,.1); border: 1px solid var(--line); border-radius: 16px; padding: 12px; color: #ffe9f3; }
+    @media(max-width: 520px) { .casebox { grid-template-columns: 1fr; } .card { padding: 20px 15px; } }
+    .choice { min-width: 150px; }
+    .jury { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+    .juror { background: rgba(255,255,255,.1); border: 1px solid var(--line); border-radius: 18px; padding: 14px; min-height: 110px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+    .juror b { font-size: 34px; } .juror span { font-size: 15px; color: #ffe0ec; }
+    @media(max-width: 560px) { .jury { grid-template-columns: 1fr; } }
+    
+    /* Wheel Styles */
+    .wheelWrap { display: flex; justify-content: center; margin: 22px 0; position: relative; overflow: hidden; padding: 20px 0; }
+    .pointer { position: absolute; top: 10px; z-index: 3; font-size: 34px; filter: drop-shadow(0 4px 6px #000); }
+    .wheel {
+      width: min(330px, 82vw); aspect-ratio: 1; border-radius: 50%; border: 8px solid rgba(255,255,255,.75);
+      background: conic-gradient(#ff5fa2 0 60deg, #ffd36b 60deg 120deg, #9d7cff 120deg 180deg, #71f0ba 180deg 240deg, #ff8aa8 240deg 300deg, #ffe28c 300deg 360deg);
+      position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.35); transition: transform 4.2s cubic-bezier(.12,.85,.18,1);
     }
-
-    .app{
-      width:min(680px, 100%);
-      position:relative;
-      z-index:1;
-    }
-
-    .card{
-      background:rgba(255,255,255,.95);
-      border:1px solid rgba(255,255,255,.45);
-      border-radius:28px;
-      padding:26px;
-      box-shadow:0 25px 80px rgba(0,0,0,.35);
-      text-align:center;
-      backdrop-filter: blur(12px);
-      min-height:430px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      animation: pop .35s ease;
-    }
-
-    @keyframes pop{
-      from{transform:translateY(18px) scale(.97); opacity:0}
-      to{transform:translateY(0) scale(1); opacity:1}
-    }
-
-    .badge{
-      display:inline-flex;
-      align-self:center;
-      gap:8px;
-      align-items:center;
-      padding:8px 14px;
-      border-radius:999px;
-      background:#f3edff;
-      color:#6a3cff;
-      font-weight:700;
-      font-size:13px;
-      margin-bottom:14px;
-    }
-
-    h1{
-      margin:6px 0 10px;
-      font-size:clamp(30px, 7vw, 48px);
-      letter-spacing:-1px;
-      line-height:1.05;
-    }
-
-    h2{
-      margin:4px 0 12px;
-      font-size:clamp(26px, 6vw, 40px);
-      line-height:1.08;
-    }
-
-    p{
-      margin:8px auto;
-      color:var(--soft);
-      font-size:clamp(17px, 4vw, 20px);
-      line-height:1.45;
-      max-width:520px;
-    }
-
-    .row{
-      display:flex;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:24px;
-    }
-
-    button{
-      border:none;
-      border-radius:18px;
-      padding:15px 20px;
-      min-width:145px;
-      font-size:17px;
-      font-weight:800;
-      cursor:pointer;
-      transition:.2s ease;
-      color:white;
-      background:linear-gradient(135deg, var(--pink), var(--purple));
-      box-shadow:0 12px 26px rgba(124,77,255,.25);
-      touch-action:manipulation;
-    }
-
-    button:hover{transform:translateY(-2px)}
-    button:active{transform:scale(.97)}
-
-    .ghost{
-      color:#3f3650;
-      background:#f0edf5;
-      box-shadow:none;
-    }
-
-    .danger{
-      background:linear-gradient(135deg, #ff5c7a, #ff9f1c);
-    }
-
-    .good{
-      background:linear-gradient(135deg, #22c55e, #16a085);
-    }
-
-    .small{
-      min-width:auto;
-      padding:12px 15px;
-      font-size:15px;
-    }
-
-    .progress{
-      width:100%;
-      height:12px;
-      border-radius:99px;
-      background:#eee8f5;
-      overflow:hidden;
-      margin:22px auto 8px;
-      max-width:440px;
-    }
-
-    .bar{
-      width:0%;
-      height:100%;
-      background:linear-gradient(90deg, var(--pink), var(--purple));
-      border-radius:99px;
-      transition:width .7s ease;
-    }
-
-    .jury{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-      margin:24px 0 4px;
-    }
-
-    .juror{
-      background:#f7f2ff;
-      border-radius:18px;
-      padding:16px 10px;
-      font-weight:800;
-      color:#4a385e;
-      animation:bob 1.4s ease-in-out infinite;
-    }
-
-    .juror:nth-child(2){animation-delay:.15s}
-    .juror:nth-child(3){animation-delay:.3s}
-
-    @keyframes bob{
-      0%,100%{transform:translateY(0)}
-      50%{transform:translateY(-6px)}
-    }
-
-    .wheel-wrap{
-      margin:18px auto;
-      width:min(310px, 82vw);
-      height:min(310px, 82vw);
-      position:relative;
-    }
-
-    .wheel{
-      width:100%;
-      height:100%;
-      border-radius:50%;
-      border:10px solid white;
-      box-shadow:0 18px 40px rgba(0,0,0,.24);
-      background:conic-gradient(
-        #ff4f8b 0deg 60deg,
-        #ffd166 60deg 120deg,
-        #7c4dff 120deg 180deg,
-        #2ecc71 180deg 240deg,
-        #ff7f50 240deg 300deg,
-        #4cc9f0 300deg 360deg
-      );
-      position:relative;
-      transition:transform 4s cubic-bezier(.1,.8,.1,1);
-      overflow:hidden;
-    }
-
-    .wheel::after{
-      content:"";
-      position:absolute;
-      inset:22%;
-      border-radius:50%;
-      background:white;
-      box-shadow:inset 0 0 0 8px #f1e8ff;
-    }
-
-    .wheel-text{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:2;
-      font-weight:900;
-      color:#20172d;
-      font-size:24px;
-      text-align:center;
-      padding:45px;
-    }
-
-    .pointer{
-      position:absolute;
-      top:-7px;
-      left:50%;
-      transform:translateX(-50%);
-      width:0;
-      height:0;
-      border-left:18px solid transparent;
-      border-right:18px solid transparent;
-      border-top:36px solid #fff;
-      filter:drop-shadow(0 6px 5px rgba(0,0,0,.18));
-      z-index:5;
-    }
-
-    .maze{
-      width:min(430px, 92vw);
-      margin:18px auto;
-      display:grid;
-      grid-template-columns:repeat(7, 1fr);
-      gap:6px;
-      direction:ltr;
-    }
-
-    .cell{
-      aspect-ratio:1;
-      border-radius:10px;
-      background:#efe8f7;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:20px;
-      font-weight:900;
-    }
-
-    .wall{background:#3b2a4b}
-    .path{background:#fff}
-    .blocked{background:#ffceda}
-    .goal{background:#d8ffe7}
-    .start{background:#e0d4ff}
-
-    .doors{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:16px;
-    }
-
-    .door{
-      padding:18px 12px;
-      border-radius:18px;
-      background:#f7f2ff;
-      border:2px solid #eee3ff;
-      font-weight:900;
-      cursor:pointer;
-      transition:.2s;
-    }
-
-    .door:hover{transform:translateY(-2px)}
-    .door span{
-      display:block;
-      color:#8a789a;
-      font-size:13px;
-      margin-top:6px;
-    }
-
-    .photo{
-      width:min(360px, 90%);
-      max-height:380px;
-      object-fit:contain;
-      border-radius:24px;
-      margin:12px auto 18px;
-      box-shadow:0 18px 45px rgba(0,0,0,.25);
-      background:#fff;
-    }
-
-    .shake{
-      animation:shake .45s infinite;
-    }
-
-    @keyframes shake{
-      0%,100%{transform:translateX(0) rotate(0)}
-      25%{transform:translateX(-3px) rotate(-1deg)}
-      75%{transform:translateX(3px) rotate(1deg)}
-    }
-
-    .stats{
-      display:grid;
-      gap:10px;
-      margin:18px auto;
-      width:min(430px, 100%);
-    }
-
-    .stat{
-      background:#f6f0ff;
-      border-radius:16px;
-      padding:12px;
-      text-align:left;
-    }
-
-    .stat b{
-      display:flex;
-      justify-content:space-between;
-      margin-bottom:8px;
-      color:#30223d;
-    }
-
-    .stat-line{
-      height:10px;
-      background:#e8ddf5;
-      border-radius:20px;
-      overflow:hidden;
-    }
-
-    .stat-fill{
-      height:100%;
-      border-radius:20px;
-      background:linear-gradient(90deg, var(--pink), var(--purple));
-    }
-
-    .hearts{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:50;
-      overflow:hidden;
-    }
-
-    .heart{
-      position:absolute;
-      top:-30px;
-      font-size:24px;
-      animation:fall 4s linear forwards;
-    }
-
-    @keyframes fall{
-      to{
-        transform:translateY(110vh) rotate(360deg);
-        opacity:0;
-      }
-    }
-
-    .confetti{
-      position:fixed;
-      width:10px;
-      height:16px;
-      top:-20px;
-      z-index:60;
-      animation:confettiFall 3.2s linear forwards;
-    }
-
-    @keyframes confettiFall{
-      to{
-        transform:translateY(110vh) rotate(720deg);
-        opacity:0;
-      }
-    }
-
-    .hidden{display:none}
-
-    @media (max-width:520px){
-      .card{padding:22px 18px; min-height:520px}
-      .jury{grid-template-columns:1fr}
-      .doors{grid-template-columns:1fr}
-      button{width:100%}
-    }
+    .wheel:after { content: "قرار"; position: absolute; inset: 34%; display: grid; place-items: center; background: white; color: #32152d; border-radius: 50%; font-size: 28px; font-weight: 900; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+    .wheelText { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-weight: 900; color: #32152d; text-shadow: 0 1px 0 rgba(255,255,255,.7); font-size: 18px; transform: rotate(var(--r)); }
+    .wheelText span { transform: translateY(-115px) rotate(calc(-1 * var(--r))); display: block; background: rgba(255,255,255,.75); padding: 4px 8px; border-radius: 999px; }
+    
+    /* Maze Styles */
+    .maze-container { width: 100%; overflow-x: auto; padding-bottom: 10px; }
+    .maze { width: 520px; height: 360px; margin: 0 auto; position: relative; background: rgba(255,255,255,.09); border: 2px solid var(--line); border-radius: 22px; overflow: hidden; flex-shrink: 0; }
+    .wall { position: absolute; background: rgba(255,255,255,.72); border-radius: 999px; box-shadow: 0 0 16px rgba(255,255,255,.18); }
+    .player { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--pink), var(--gold)); display: grid; place-items: center; box-shadow: 0 8px 18px rgba(0,0,0,.25); transition: .18s; z-index: 5; font-size: 18px; }
+    .door { position: absolute; padding: 9px 10px; border-radius: 12px; font-size: 13px; font-weight: 900; z-index: 4; border: 1px solid rgba(255,255,255,.3); }
+    .goodDoor { right: 15px; bottom: 16px; background: rgba(113,240,186,.22); color: #d7ffef; }
+    .badDoor { left: 15px; top: 16px; background: rgba(255,107,125,.2); color: #ffdce2; }
+    .closed { position: absolute; left: 72px; top: 78px; background: #ff6b7d; color: white; border-radius: 14px; padding: 8px 10px; font-size: 12px; transform: rotate(-7deg); z-index: 6; }
+    .mazeControls { display: grid; grid-template-columns: 58px 58px 58px; gap: 8px; justify-content: center; margin-top: 15px; direction: ltr; }
+    .mazeControls button { padding: 12px; min-width: 58px; }
+    .mazeControls .empty { visibility: hidden; }
+    
+    /* Images & Meter */
+    .sadImg, .finalImg { width: min(430px, 100%); border-radius: 24px; border: 1px solid var(--line); box-shadow: 0 18px 44px rgba(0,0,0,.35); margin: 14px auto; display: block; object-fit: cover; }
+    .sadImg.shake { animation: shake .5s infinite; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px) rotate(-1deg); } 75% { transform: translateX(3px) rotate(1deg); } }
+    .meter { height: 18px; border-radius: 999px; background: rgba(255,255,255,.13); overflow: hidden; border: 1px solid var(--line); margin: 18px auto; width: min(420px, 100%); }
+    .meter span { display: block; height: 100%; width: 97%; background: linear-gradient(90deg, #ff6b7d, #ffd36b); border-radius: 999px; animation: fill 1s ease; }
+    @keyframes fill { from { width: 0; } to { width: 97%; } }
+    
+    /* Effects */
+    .hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+    .heart { position: absolute; bottom: -30px; animation: floatUp 4.5s linear forwards; opacity: .9; pointer-events: none; }
+    @keyframes floatUp { to { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
+    .confetti { position: fixed; width: 10px; height: 16px; top: -20px; animation: fall 3s linear forwards; z-index: 11; border-radius: 3px; pointer-events: none; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(600deg); opacity: 0; } }
   </style>
 </head>
 <body>
-  <div class="floating-bg" id="floatingBg"></div>
   <div class="hearts" id="hearts"></div>
-  <div class="app">
-    <main class="card" id="card"></main>
-  </div>
+  <main class="stage">
+    <section class="card" id="app"></section>
+  </main>
 
   <script>
-    const card = document.getElementById("card");
-    const hearts = document.getElementById("hearts");
-    const floatingBg = document.getElementById("floatingBg");
+    const app = document.getElementById('app');
+    const hearts = document.getElementById('hearts');
+    let mazeX = 22, mazeY = 302;
+    let isSpinning = false; // لمنع تعليق العجلة
 
-    const state = {
-      q: 0,
-      answers: [],
-      wheelSpun: false
+    const set = (html) => { 
+      app.classList.remove('fade'); 
+      void app.offsetWidth; // Trigger reflow
+      app.classList.add('fade'); 
+      app.innerHTML = html; 
     };
-
-    const questions = [
-      {
-        title: "Why are you upset?",
-        options: ["I forgot", "Not sure", "Long story"]
-      },
-      {
-        title: "How serious is this?",
-        options: ["A little", "Kind of serious", "Very serious"]
-      }
-    ];
-
-    for(let i=0;i<30;i++){
-      const b = document.createElement("span");
-      b.className = "bubble";
-      b.style.left = Math.random()*100 + "%";
-      b.style.animationDuration = (7 + Math.random()*7) + "s";
-      b.style.animationDelay = (Math.random()*7) + "s";
-      floatingBg.appendChild(b);
-    }
-
-    function set(html){
-      card.innerHTML = html;
-      card.style.animation = "none";
-      void card.offsetWidth;
-      card.style.animation = "pop .35s ease";
-    }
-
-    function clickSound(){
-      try{
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.value = 520;
-        osc.type = "sine";
-        gain.gain.value = 0.05;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-        osc.stop(ctx.currentTime + 0.18);
-      }catch(e){}
-    }
+    
+    const btn = (text, cls, fn, id="") => `<button ${id ? `id="${id}"` : ""} class="${cls||''}" onclick="${fn}">${text}</button>`;
 
     function start(){
-      clickSound();
       set(`
-        <div class="badge">Case #2026</div>
-        <h1>The Grudge Court</h1>
-        <p>A complaint has been received.</p>
-        <p>Let's see what is going on.</p>
-        <div class="row">
-          <button onclick="showQuestion()">Start</button>
+        <div class="court">⚖️</div>
+        <span class="badge">ملف رقم: #2026-R</span>
+        <h1>محكمة الزعل</h1>
+        <p>تم استلام طلب مراجعة حالة انقطاع التواصل.</p>
+        <p class="small">يرجى متابعة الإجراءات حتى صدور القرار النهائي.</p>
+        <div class="casebox">
+          <div><b>نوع الملف:</b><br>مراجعة خلاف شخصي</div>
+          <div><b>الحالة الحالية:</b><br>قيد الدراسة</div>
+        </div>
+        <div class="btns">${btn('بدء المراجعة', 'primary', 'questionOne()')}</div>
+      `);
+    }
+
+    function questionOne(){
+      set(`
+        <span class="badge">المرحلة ١: جمع المعلومات</span>
+        <h1>يرجى تحديد سبب تقديم الشكوى</h1>
+        <p>اختر الخيار الأقرب، دون الحاجة إلى شرح طويل.</p>
+        <div class="btns">
+          ${btn('السبب غير واضح', 'choice', 'answer()')}
+          ${btn('تم نسيان التفاصيل', 'choice', 'answer()')}
+          ${btn('الموضوع يحتاج مراجعة', 'choice', 'answer()')}
         </div>
       `);
     }
 
-    function showQuestion(){
-      clickSound();
-      const q = questions[state.q];
+    function answer(){
       set(`
-        <div class="badge">Question ${state.q + 1} of ${questions.length}</div>
-        <h2>${q.title}</h2>
-        <p>Please choose one answer.</p>
-        <div class="row">
-          ${q.options.map(o => `<button class="ghost" onclick="answer('${o.replace(/'/g, "\\'")}')">${o}</button>`).join("")}
+        <span class="badge">تم تسجيل الإفادة</span>
+        <h1>هل ما زالت القضية تستحق الاستمرار؟</h1>
+        <p>سيتم اعتماد الإجابة ضمن تقرير المراجعة.</p>
+        <div class="btns">
+          ${btn('نعم', 'choice primary', 'jury()')}
+          ${btn('ربما', 'choice primary', 'jury()')}
+          ${btn('غير متأكد', 'choice primary', 'jury()')}
         </div>
+        <p class="small">ملاحظة: سيتم تحليل الإجابة وفق مصلحة الطرفين.</p>
       `);
-    }
-
-    function answer(a){
-      clickSound();
-      state.answers.push(a);
-      state.q++;
-      if(state.q < questions.length){
-        showQuestion();
-      }else{
-        checking();
-      }
-    }
-
-    function checking(){
-      clickSound();
-      set(`
-        <div class="badge">Review</div>
-        <h2>Checking answers...</h2>
-        <div class="progress"><div class="bar" id="bar"></div></div>
-        <p id="checkText">Please wait.</p>
-      `);
-
-      let width = 0;
-      const bar = document.getElementById("bar");
-      const text = document.getElementById("checkText");
-      const timer = setInterval(() => {
-        width += 25;
-        bar.style.width = width + "%";
-        if(width === 50) text.textContent = "Looking at the details.";
-        if(width === 75) text.textContent = "Almost done.";
-        if(width >= 100){
-          clearInterval(timer);
-          setTimeout(jury, 450);
-        }
-      }, 420);
     }
 
     function jury(){
-      clickSound();
       set(`
-        <div class="badge">Jury</div>
-        <h2>Done.</h2>
-        <p>This situation might be a little overdramatic.</p>
+        <span class="badge">المرحلة ٢: لجنة المراجعة</span>
+        <h1>انتهت المداولات</h1>
         <div class="jury">
-          <div class="juror">🙂<br>Talk</div>
-          <div class="juror">😌<br>Fix it</div>
-          <div class="juror">🧐<br>No grudge</div>
+          <div class="juror"><b>📄</b><span>لا يوجد سبب كافٍ للاستمرار.</span></div>
+          <div class="juror"><b>⚖️</b><span>الملف قابل للإغلاق.</span></div>
+          <div class="juror"><b>🕊️</b><span>التسوية هي الخيار الأنسب.</span></div>
         </div>
-        <p>The jury has made a decision.</p>
-        <div class="row">
-          <button onclick="wheel()">I disagree</button>
+        <p>لم تجد لجنة المراجعة مبرراً كافياً لاستمرار النزاع.</p>
+        <div class="btns">
+          ${btn('اعتماد القرار', 'primary', 'finalScene()')}
+          ${btn('تقديم اعتراض', 'danger', 'wheelScene()')}
         </div>
       `);
     }
 
-    function wheel(){
-      clickSound();
+    function wheelScene(){
+      isSpinning = false;
       set(`
-        <div class="badge">Luck</div>
-        <h2>Let's leave this to luck.</h2>
-        <p>Spin the wheel.</p>
-        <div class="wheel-wrap">
-          <div class="pointer"></div>
-          <div class="wheel" id="wheel"></div>
-          <div class="wheel-text" id="wheelText">?</div>
+        <span class="badge">المرحلة ٣: الاعتراض</span>
+        <h1>آلية اختيار محايدة</h1>
+        <p>سيتم تحويل الاعتراض إلى عجلة القرار لإصدار نتيجة نهائية.</p>
+        <div class="wheelWrap">
+          <div class="pointer">▼</div>
+          <div class="wheel" id="wheel">
+            <div class="wheelText" style="--r:0deg"><span>إغلاق الملف</span></div>
+            <div class="wheelText" style="--r:60deg"><span>فتح تواصل</span></div>
+            <div class="wheelText" style="--r:120deg"><span>فرصة جديدة</span></div>
+            <div class="wheelText" style="--r:180deg"><span>إنهاء الخلاف</span></div>
+            <div class="wheelText" style="--r:240deg"><span>تسوية</span></div>
+            <div class="wheelText" style="--r:300deg"><span>قبول القرار</span></div>
+          </div>
         </div>
-        <div class="row">
-          <button onclick="spinWheel()" id="spinBtn">Spin</button>
-          <button class="ghost hidden" id="challengeBtn" onclick="maze()">I still disagree</button>
-        </div>
+        <div class="btns">${btn('تشغيل العجلة', 'primary', 'spinWheel()', 'spinBtn')}</div>
       `);
     }
 
     function spinWheel(){
-      clickSound();
-      const wheel = document.getElementById("wheel");
-      const spinBtn = document.getElementById("spinBtn");
-      const challengeBtn = document.getElementById("challengeBtn");
-      const wheelText = document.getElementById("wheelText");
-      spinBtn.disabled = true;
-      wheelText.textContent = "Spinning...";
-      wheel.style.transform = "rotate(1840deg)";
+      if(isSpinning) return;
+      isSpinning = true;
+      document.getElementById('spinBtn').disabled = true;
+      
+      const w = document.getElementById('wheel');
+      w.style.transform = 'rotate(2160deg)';
+      
       setTimeout(() => {
-        wheelText.innerHTML = "Talk Again<br>❤️";
-        spinBtn.classList.add("hidden");
-        challengeBtn.classList.remove("hidden");
-      }, 4100);
-    }
-
-    function maze(){
-      clickSound();
-      set(`
-        <div class="badge">Challenge</div>
-        <h2>Complete the challenge.</h2>
-        <p>If you still disagree, reach the end of the maze.</p>
-        <div class="maze">
-          ${[
-            "S","p","p","w","p","p","G",
-            "w","w","p","w","p","w","p",
-            "p","p","p","p","p","w","p",
-            "p","w","w","w","p","w","p",
-            "p","p","p","w","p","p","p",
-            "w","w","p","w","w","w","p",
-            "B","p","p","p","p","p","H"
-          ].map(c => {
-            let cls = c==="w" ? "wall" : c==="S" ? "start" : c==="B" ? "blocked" : c==="H" ? "goal" : c==="G" ? "blocked" : "path";
-            let txt = c==="S" ? "▶" : c==="B" ? "🔒" : c==="H" ? "✓" : c==="G" ? "×" : "";
-            return `<div class="cell ${cls}">${txt}</div>`;
-          }).join("")}
-        </div>
-        <div class="doors">
-          <div class="door" onclick="badPath()">Stay Angry <span>Closed</span></div>
-          <div class="door" onclick="goodPath()">Talk Again <span>Open</span></div>
-        </div>
-      `);
-    }
-
-    function badPath(){
-      clickSound();
-      set(`
-        <div class="badge">Closed Path</div>
-        <h2>Your choice has been noted.</h2>
-        <img class="photo" src="iwantyou.png" alt="I want you">
-        <p>But there is something you should see.</p>
-        <div class="row">
-          <button onclick="badPathTwo()">Continue</button>
-        </div>
-      `);
-    }
-
-    function badPathTwo(){
-      clickSound();
-      set(`
-        <div class="badge">More Info</div>
-        <h2>More information has been found.</h2>
-        <img class="photo" src="imissyou.jpg" alt="I miss you">
-        <p>Please review carefully.</p>
-        <div class="row">
-          <button class="danger" onclick="badPathThree()">Continue Anyway</button>
-        </div>
-      `);
-    }
-
-    function badPathThree(){
-      clickSound();
-      set(`
-        <div class="badge">Final Review</div>
-        <h2>Review Complete</h2>
-        <p>It may be time to stop being angry.</p>
-        <div class="stats">
-          <div class="stat">
-            <b><span>Anger Level</span><span>2%</span></b>
-            <div class="stat-line"><div class="stat-fill" style="width:2%"></div></div>
+        set(`
+          <span class="badge">نتيجة الاعتراض</span>
+          <h1>النتيجة: إغلاق الخلاف</h1>
+          <p>تمت مراجعة الاعتراض، ولم تتغير التوصية الأساسية.</p>
+          <div class="btns">
+            ${btn('اعتماد النتيجة', 'primary', 'finalScene()')}
+            ${btn('متابعة الاعتراض', 'danger', 'mazeScene()')}
           </div>
-          <div class="stat">
-            <b><span>Missing Each Other</span><span>98%</span></b>
-            <div class="stat-line"><div class="stat-fill" style="width:98%"></div></div>
+        `);
+      }, 4300);
+    }
+
+    function mazeScene(){
+      mazeX = 22; mazeY = 302;
+      set(`
+        <span class="badge">المرحلة ٤: مسار الاعتراض</span>
+        <h1>يرجى اختيار المسار النهائي</h1>
+        <p>المسار البديل متاح شكلياً، لكن قد لا يكون قابلاً للتنفيذ.</p>
+        <div class="maze-container" dir="ltr">
+          <div class="maze" id="maze">
+            <div class="door badDoor">🚪 استمرار</div>
+            <div class="door goodDoor">🚪 إغلاق</div>
+            <div class="closed">غير متاح حالياً</div>
+            <div class="wall" style="left:0;top:0;width:100%;height:8px"></div>
+            <div class="wall" style="left:0;bottom:0;width:100%;height:8px"></div>
+            <div class="wall" style="left:0;top:0;width:8px;height:100%"></div>
+            <div class="wall" style="right:0;top:0;width:8px;height:100%"></div>
+            <div class="wall" style="left:70px;top:55px;width:8px;height:245px"></div>
+            <div class="wall" style="left:70px;top:55px;width:250px;height:8px"></div>
+            <div class="wall" style="left:145px;top:115px;width:290px;height:8px"></div>
+            <div class="wall" style="left:145px;top:115px;width:8px;height:165px"></div>
+            <div class="wall" style="left:220px;top:178px;width:250px;height:8px"></div>
+            <div class="wall" style="left:220px;top:178px;width:8px;height:110px"></div>
+            <div class="wall" style="left:300px;top:240px;width:165px;height:8px"></div>
+            <div class="player" id="player">💗</div>
           </div>
         </div>
-        <p>This case should be closed.</p>
-        <div class="row">
-          <button onclick="finale()">Close Case ❤️</button>
+        <div class="mazeControls">
+          <button class="empty">.</button><button onclick="moveMaze(0,-42)">⬆</button><button class="empty">.</button>
+          <button onclick="moveMaze(-42,0)">⬅</button><button onclick="moveMaze(0,42)">⬇</button><button onclick="moveMaze(42,0)">➡</button>
+        </div>
+        <div class="btns">
+          ${btn('اختبار المسار البديل', 'danger', 'sadOne()')}
+          ${btn('اعتماد الإغلاق', 'primary', 'finalScene()')}
         </div>
       `);
+      drawPlayer();
     }
 
-    function goodPath(){
-      clickSound();
+    function drawPlayer(){
+      const p = document.getElementById('player');
+      if(!p) return;
+      p.style.left = mazeX + 'px';
+      p.style.top = mazeY + 'px';
+    }
+
+    function moveMaze(dx, dy){
+      mazeX = Math.max(14, Math.min(470, mazeX + dx));
+      mazeY = Math.max(14, Math.min(308, mazeY + dy));
+      drawPlayer();
+      if(mazeX > 410 && mazeY > 260) finalScene();
+      if(mazeX < 85 && mazeY < 90) sadOne();
+    }
+
+    function sadOne(){
       set(`
-        <div class="badge">Good Choice</div>
-        <h2>Final Decision</h2>
-        <p>This case should be closed.</p>
-        <p>Life is too short for this.</p>
-        <div class="row">
-          <button class="good" onclick="finale()">Close Case ❤️</button>
+        <span class="badge">المسار البديل</span>
+        <h1>تم استلام طلب الاستمرار بالخلاف</h1>
+        <p>تم إرفاق مستند إضافي ضمن الملف.</p>
+        <img class="sadImg" src="iwantyou.png" alt="I want you" onerror="this.style.display='none'">
+        <div class="btns">
+          ${btn('متابعة المراجعة', 'danger', 'sadTwo()')}
+          ${btn('العودة للقرار الأساسي', 'primary', 'finalScene()')}
         </div>
       `);
     }
 
-    function finale(){
-      clickSound();
-      makeHearts();
-      makeConfetti();
+    function sadTwo(){
       set(`
-        <div class="badge">Case Closed</div>
-        <h2>Decision Accepted</h2>
-        <img class="photo shake" src="result.png" alt="Result">
-        <p>Thank you for your cooperation.</p>
-        <div class="row">
-          <button onclick="location.reload()">Restart</button>
+        <span class="badge">مستند إضافي</span>
+        <h1>تمت إضافة ملاحظة جديدة</h1>
+        <p>يرجى مراجعة المرفق قبل تثبيت الاعتراض.</p>
+        <img class="sadImg" src="imissyou.jpg" alt="I miss you" onerror="this.style.display='none'">
+        <div class="btns">
+          ${btn('تثبيت الاعتراض', 'danger', 'sadThree()')}
+          ${btn('إلغاء الاعتراض', 'primary', 'finalScene()')}
         </div>
       `);
     }
 
-    function makeHearts(){
-      for(let i=0;i<45;i++){
-        setTimeout(() => {
-          const h = document.createElement("div");
-          h.className = "heart";
-          h.textContent = ["❤️","💗","💕","💖"][Math.floor(Math.random()*4)];
-          h.style.left = Math.random()*100 + "vw";
-          h.style.animationDuration = (3 + Math.random()*2) + "s";
-          hearts.appendChild(h);
-          setTimeout(() => h.remove(), 5200);
-        }, i*55);
+    function sadThree(){
+      set(`
+        <span class="badge">نتيجة المراجعة</span>
+        <h1>تم تسجيل الملاحظة</h1>
+        <img class="sadImg shake" src="imissyou.jpg" alt="I miss you" onerror="this.style.display='none'">
+        <p>مؤشر صعوبة استمرار الخلاف:</p>
+        <div class="meter"><span></span></div>
+        <h1>97%</h1>
+        <p>بعد مراجعة جميع البيانات، لم يتم العثور على مبرر كافٍ لاستمرار هذه القضية.</p>
+        <div class="btns">
+          ${btn('إغلاق الملف', 'primary', 'finalScene()')}
+        </div>
+      `);
+    }
+
+    function finalScene(){
+      burstHearts(); confetti();
+      set(`
+        <span class="badge">القرار النهائي</span>
+        <h1>تم إغلاق الملف</h1>
+        <p>بعد مراجعة الأدلة، الشهادات، الاعتراض، العجلة، والمسار البديل، تقرر إنهاء الخلاف.</p>
+        <img class="finalImg" src="result.png" alt="final result" onerror="this.style.display='none'">
+        <p>حالة القضية: مغلقة. لا توجد إجراءات إضافية مطلوبة.</p>
+        <div class="btns">
+          ${btn('اعتماد القرار', 'primary', 'doneScene()')}
+          ${btn('إعادة المراجعة', 'ghost', 'start()')}
+        </div>
+      `);
+    }
+
+    function doneScene(){
+      burstHearts(); confetti();
+      set(`
+        <div class="court">🕊️</div>
+        <h1>تم اعتماد القرار بنجاح</h1>
+        <p>تم نقل الملف إلى الأرشيف، وإغلاق جميع نقاط الخلاف.</p>
+        <p class="small">نتمنى للطرفين تواصلاً أهدأ وقرارات أفضل.</p>
+        <div class="btns">${btn('البدء من جديد', 'primary', 'start()')}</div>
+      `);
+    }
+
+    function burstHearts(){
+      for(let i=0; i<25; i++){
+        const h = document.createElement('div');
+        h.className = 'heart'; 
+        h.textContent = ['❤️','💗','💕','💞','🕊️'][Math.floor(Math.random()*5)];
+        h.style.left = Math.random() * 100 + 'vw'; 
+        h.style.animationDelay = (Math.random() * 1.2) + 's'; 
+        h.style.fontSize = (18 + Math.random() * 24) + 'px';
+        hearts.appendChild(h); 
+        setTimeout(() => h.remove(), 5500);
       }
     }
 
-    function makeConfetti(){
-      const colors = ["#ff4f8b","#7c4dff","#ffd166","#2ecc71","#4cc9f0"];
-      for(let i=0;i<80;i++){
-        setTimeout(() => {
-          const c = document.createElement("div");
-          c.className = "confetti";
-          c.style.left = Math.random()*100 + "vw";
-          c.style.background = colors[Math.floor(Math.random()*colors.length)];
-          c.style.animationDuration = (2.4 + Math.random()*1.6) + "s";
-          document.body.appendChild(c);
-          setTimeout(() => c.remove(), 4200);
-        }, i*20);
+    function confetti(){
+      for(let i=0; i<45; i++){
+        const c = document.createElement('div'); 
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw'; 
+        c.style.background = ['#ff5fa2','#ffd36b','#71f0ba','#9d7cff','#fff'][Math.floor(Math.random()*5)];
+        c.style.animationDelay = (Math.random() * 1) + 's'; 
+        document.body.appendChild(c); 
+        setTimeout(() => c.remove(), 4200);
       }
     }
 
